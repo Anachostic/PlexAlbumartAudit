@@ -125,7 +125,6 @@ SKIPTOENDING:
         Dim root As IO.DirectoryInfo
         Dim subfolders() As IO.DirectoryInfo
         Dim guidPath As String
-        Dim bmp As System.Drawing.Bitmap
         Dim dv As DataView
         Dim idx As Integer = 1
 
@@ -139,30 +138,18 @@ SKIPTOENDING:
             Console.Write(vbBack & vbBack & vbBack & $"{Math.Round(CDbl(idx / subfolders.Count) * 100).ToString("00")}%")
 
             For Each guidFl As IO.DirectoryInfo In subFl.GetDirectories
+                ' Check files pulled from metadata
                 guidPath = IO.Path.Combine(guidFl.FullName, "Contents\_combined\posters")
 
                 If IO.Directory.Exists(guidPath) Then
-                    For Each f As IO.FileInfo In New IO.DirectoryInfo(guidPath).GetFiles
-                        ' look in db to see if this album art is being used (there may be both a lastFM version and a local version available on disk)
-                        dv.RowFilter = $"url='metadata://posters/{f.Name}'"
+                    CheckPosterFiles(guidPath, dv, "metadata")
+                End If ' posters folder exists
 
-                        If dv.Count > 0 Then
-                            Try
-                                ' check the size of the image file (it doesn't have an extension)
-                                bmp = DirectCast(System.Drawing.Bitmap.FromFile(f.FullName), System.Drawing.Bitmap)
-                                dv(0).Row.Item("Size") = $"{bmp.Width}x{bmp.Height}"
-                                bmp.Dispose()
+                ' Check manual uploads
+                guidPath = IO.Path.Combine(guidFl.FullName, "Uploads\posters")
 
-                            Catch ex As Exception
-                                Console.WriteLine("")
-                                Console.WriteLine($"Error processing image file {f.Name}")
-                                Console.Write("   ")
-                            End Try
-
-                        End If ' Matched in database
-
-                    Next ' Each potential poster
-
+                If IO.Directory.Exists(guidPath) Then
+                    CheckPosterFiles(guidPath, dv, "upload")
                 End If ' posters folder exists
 
             Next ' Each guid folder
@@ -175,6 +162,31 @@ SKIPTOENDING:
 
         Console.WriteLine("")
 
+    End Sub
+
+    Private Sub CheckPosterFiles(guidPath As String, dv As DataView, filterPrefix As String)
+        Dim bmp As System.Drawing.Bitmap
+
+        For Each f As IO.FileInfo In New IO.DirectoryInfo(guidPath).GetFiles
+            ' look in db to see if this album art is being used (there may be both a lastFM version and a local version available on disk)
+            dv.RowFilter = $"url='{filterPrefix}://posters/{f.Name}'"
+
+            If dv.Count > 0 Then
+                Try
+                    ' check the size of the image file (it doesn't have an extension)
+                    bmp = DirectCast(System.Drawing.Bitmap.FromFile(f.FullName), System.Drawing.Bitmap)
+                    dv(0).Row.Item("Size") = $"{bmp.Width}x{bmp.Height}"
+                    bmp.Dispose()
+
+                Catch ex As Exception
+                    Console.WriteLine("")
+                    Console.WriteLine($"Error processing image file {f.Name}")
+                    Console.Write("   ")
+                End Try
+
+            End If ' Matched in database
+
+        Next ' Each potential poster
     End Sub
 
     Private Sub WriteToFile(outputFilename As String)
