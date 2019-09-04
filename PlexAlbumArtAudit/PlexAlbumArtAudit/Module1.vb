@@ -25,8 +25,22 @@
                 ShowHelp()
                 Exit Select
 
-            Case args.Contains("-ex", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/ex", StringComparer.CurrentCultureIgnoreCase)
+            Case args.Contains("-ep", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/ep", StringComparer.CurrentCultureIgnoreCase)
                 PlaylistManagement.ExportPlaylists(dbPath)
+
+            Case args.Contains("-ea", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/ea", StringComparer.CurrentCultureIgnoreCase)
+                rootPath = $"{Environment.GetEnvironmentVariable("localappdata")}\Plex Media Server\Metadata\Artists"
+
+                Try
+                    If Not String.IsNullOrEmpty(Configuration.ConfigurationManager.AppSettings("rootPath")) Then rootPath = Configuration.ConfigurationManager.AppSettings("rootPath")
+                Catch ex As Exception
+                    Console.WriteLine("Unable to set custom rootPath from config file.  Default will be used.")
+                End Try
+
+                ArtistArt.ExportArtistArt(dbPath, rootPath)
+                Console.WriteLine("")
+                Console.WriteLine("Done exporting.  Press any key to exit.")
+                Console.ReadKey()
 
             Case args.Contains("-rs", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/rs", StringComparer.CurrentCultureIgnoreCase)
                 rootPath = $"{Environment.GetEnvironmentVariable("localappdata")}\Plex Media Server\Metadata\Albums"
@@ -38,6 +52,7 @@
                 End Try
 
                 PosterAudit.SetAllToLargest(dbPath, rootPath)
+                Console.WriteLine("")
                 Console.WriteLine("Done scanning.  Press any key to exit.")
                 Console.ReadKey()
 
@@ -59,9 +74,9 @@
                 End Try
 
                 PosterAudit.Audit(dbPath, rootPath, outputPath)
-                'AuditAlbumArt()
 
                 Console.WriteLine("Do you want to open the result file now? (Y/n)")
+
                 Do
                     resp = Console.ReadKey()
                     Select Case True
@@ -82,17 +97,15 @@
 
     End Sub
 
-    Private Sub UpdateArtToLargest()
-
-    End Sub
-
     Private Sub ShowHelp()
         Dim sb As New System.Text.StringBuilder
 
         With sb
             .AppendLine(My.Application.Info.AssemblyName.ToUpper & " ")
             .AppendLine("")
-            .AppendLine(" /EX       Export playlists")
+            .AppendLine("(default)  Audit album posters")
+            .AppendLine(" /EP       Export playlists")
+            .AppendLine(" /EA       Export artist posters")
             .AppendLine(" /RS       Replace posters with largest available size")
 
             .AppendLine(" /?        Displays help")
