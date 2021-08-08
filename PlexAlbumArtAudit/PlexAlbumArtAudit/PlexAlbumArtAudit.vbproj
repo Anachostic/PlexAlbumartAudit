@@ -50,6 +50,9 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FlacLibSharp, Version=3.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FlacLibSharp.3.2.1\lib\net20\FlacLibSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -90,6 +93,7 @@
     </Compile>
     <Compile Include="PlaylistManagement.vb" />
     <Compile Include="PosterAudit.vb" />
+    <Compile Include="Ratings.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">

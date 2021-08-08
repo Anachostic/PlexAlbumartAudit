@@ -56,6 +56,11 @@
                 Console.WriteLine("Done scanning.  Press any key to exit.")
                 Console.ReadKey()
 
+            Case args.Any(Function(x) x.StartsWith("-ur", StringComparison.CurrentCultureIgnoreCase) OrElse x.StartsWith("/ur", StringComparison.CurrentCultureIgnoreCase))
+                Dim path As String
+                path = args.First(Function(x) x.StartsWith("-ur", StringComparison.CurrentCultureIgnoreCase) OrElse x.StartsWith("/ur", StringComparison.CurrentCultureIgnoreCase)).Substring(4)
+                Ratings.SetRatingFromFile(dbPath, path, 5)
+
             Case Else
                 outputPath = "AlbumArtAudit.csv"
                 rootPath = $"{Environment.GetEnvironmentVariable("localappdata")}\Plex Media Server\Metadata\Albums"
@@ -95,6 +100,11 @@
 
         Console.WriteLine("Complete.")
 
+        If args.Any(Function(x) x.Equals("/p", StringComparison.CurrentCultureIgnoreCase) Or x.Equals("-p", StringComparison.CurrentCultureIgnoreCase)) Then
+            Console.WriteLine("Press any key to complete.")
+            Console.ReadKey()
+        End If
+
     End Sub
 
     Private Sub ShowHelp()
@@ -103,10 +113,12 @@
         With sb
             .AppendLine(My.Application.Info.AssemblyName.ToUpper & " ")
             .AppendLine("")
-            .AppendLine("(default)  Audit album posters")
-            .AppendLine(" /EP       Export playlists")
-            .AppendLine(" /EA       Export artist posters")
-            .AppendLine(" /RS       Replace posters with largest available size")
+            .AppendLine("(default)      Audit album posters")
+            .AppendLine(" /EP           Export playlists")
+            .AppendLine(" /EA           Export artist posters")
+            .AppendLine(" /RS           Replace posters with largest available size")
+            .AppendLine(" /UR:(path)    Update ratings from files in (path)")
+            .AppendLine(" /P            Wait for keypress at completion")
 
             .AppendLine(" /?        Displays help")
         End With
