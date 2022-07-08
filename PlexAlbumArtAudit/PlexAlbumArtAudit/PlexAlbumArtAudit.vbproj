@@ -70,7 +70,6 @@
     <Import Include="System.Data" />
     <Import Include="System.Diagnostics" />
     <Import Include="System.Linq" />
-    <Import Include="System.Xml.Linq" />
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +93,7 @@
     <Compile Include="PlaylistManagement.vb" />
     <Compile Include="PosterAudit.vb" />
     <Compile Include="Ratings.vb" />
+    <Compile Include="Metadata.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">

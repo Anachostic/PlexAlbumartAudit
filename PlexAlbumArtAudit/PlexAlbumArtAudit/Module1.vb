@@ -39,8 +39,20 @@
 
                 ArtistArt.ExportArtistArt(dbPath, rootPath)
                 Console.WriteLine("")
-                Console.WriteLine("Done exporting.  Press any key to exit.")
-                Console.ReadKey()
+                Console.WriteLine("Done exporting.")
+
+            Case args.Contains("-al", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/al", StringComparer.CurrentCultureIgnoreCase)
+                rootPath = $"{Environment.GetEnvironmentVariable("localappdata")}\Plex Media Server\Metadata\Artists"
+
+                Try
+                    If Not String.IsNullOrEmpty(Configuration.ConfigurationManager.AppSettings("rootPath")) Then rootPath = Configuration.ConfigurationManager.AppSettings("rootPath")
+                Catch ex As Exception
+                    Console.WriteLine("Unable to set custom rootPath from config file.  Default will be used.")
+                End Try
+
+                ArtistArt.SetArtistArtToLocal(dbPath, rootPath)
+                Console.WriteLine("")
+                Console.WriteLine("Artist art updated.")
 
             Case args.Contains("-rs", StringComparer.CurrentCultureIgnoreCase) Or args.Contains("/rs", StringComparer.CurrentCultureIgnoreCase)
                 rootPath = $"{Environment.GetEnvironmentVariable("localappdata")}\Plex Media Server\Metadata\Albums"
@@ -53,8 +65,8 @@
 
                 PosterAudit.SetAllToLargest(dbPath, rootPath)
                 Console.WriteLine("")
-                Console.WriteLine("Done scanning.  Press any key to exit.")
-                Console.ReadKey()
+                Console.WriteLine("Done scanning.")
+
 
             Case args.Any(Function(x) x.StartsWith("-ur", StringComparison.CurrentCultureIgnoreCase) OrElse x.StartsWith("/ur", StringComparison.CurrentCultureIgnoreCase))
                 Dim path As String
@@ -101,6 +113,7 @@
         Console.WriteLine("Complete.")
 
         If args.Any(Function(x) x.Equals("/p", StringComparison.CurrentCultureIgnoreCase) Or x.Equals("-p", StringComparison.CurrentCultureIgnoreCase)) Then
+            Console.WriteLine("")
             Console.WriteLine("Press any key to complete.")
             Console.ReadKey()
         End If
@@ -116,7 +129,8 @@
             .AppendLine("(default)      Audit album posters")
             .AppendLine(" /EP           Export playlists")
             .AppendLine(" /EA           Export artist posters")
-            .AppendLine(" /RS           Replace posters with largest available size")
+            .AppendLine(" /AL           Set all artist posters to local files")
+            .AppendLine(" /RS           Replace album posters with largest available size")
             .AppendLine(" /UR:(path)    Update ratings from files in (path)")
             .AppendLine(" /P            Wait for keypress at completion")
 

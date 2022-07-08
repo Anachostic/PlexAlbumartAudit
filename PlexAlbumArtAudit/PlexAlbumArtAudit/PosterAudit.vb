@@ -204,15 +204,21 @@
 
             Try
                 If CStr(dr("url")).StartsWith("upload", StringComparison.CurrentCultureIgnoreCase) Then
+                    ' Existing poster is an uploaded file
                     bmp = DirectCast(System.Drawing.Bitmap.FromFile($"{bundleFolder.FullName}\Uploads\posters\{CStr(dr("url")).Substring(17)}"), Drawing.Bitmap)
 
                 ElseIf CStr(dr("url")).StartsWith("metadata", StringComparison.CurrentCultureIgnoreCase) Then
+                    ' existing poster is from an agent
                     m = Text.RegularExpressions.Regex.Match(CStr(dr("url")), "metadata:\/\/posters\/([0-9a-z\.]+)_([a-f0-9]+)")
                     If m.Success Then
                         bmp = DirectCast(System.Drawing.Bitmap.FromFile($"{bundleFolder.FullName}\Contents\{m.Groups(1).Value}\posters\{m.Groups(2).Value}"), Drawing.Bitmap)
                     Else
                         Continue For
                     End If
+
+                ElseIf IsDBNull(dr("url")) OrElse String.IsNullOrEmpty(CStr(dr("url"))) Then
+                    ' There is no poster defined
+                    bmp = New Drawing.Bitmap(1, 1)
 
                 Else
                     Continue For
@@ -300,11 +306,14 @@
         Dim dv As DataView
         Dim conn As SQLite.SQLiteConnection
         Dim cmd As SQLite.SQLiteCommand
+        Dim triggers As Dictionary(Of String, String)
 
         dv = New DataView(libraryDB)
         dv.RowFilter = "size is not null"
 
         Console.WriteLine($"{dv.Count} changes queued. ")
+
+        triggers = Metadata.GetMetadataTriggers(dbPath)
 
         If dv.Count > 0 Then
             ' open Plex
@@ -330,8 +339,11 @@
             Console.WriteLine(" complete.")
 
             conn.Close()
+            conn.Dispose()
 
         End If
+
+        Metadata.RestoreMetadataTriggers(dbPath, triggers)
 
         dv.Dispose()
 

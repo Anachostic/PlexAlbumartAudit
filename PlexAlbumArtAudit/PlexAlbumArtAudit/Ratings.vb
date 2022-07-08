@@ -2,7 +2,7 @@
 
     Shared Sub SetRatingFromFile(dbPath As String, rootPath As String, scale As Integer)
         Dim conn As SQLite.SQLiteConnection = Nothing
-        Dim cmdRead As SQLite.SQLiteCommand
+        Dim cmdRead As SQLite.SQLiteCommand = Nothing
         Dim cmdWrite As SQLite.SQLiteCommand
         Dim dr As SQLite.SQLiteDataReader
         Dim id As Integer
@@ -98,7 +98,7 @@
                     End If
 
                 Finally
-                    cmdRead.Dispose()
+                    If cmdRead IsNot Nothing Then cmdRead.Dispose()
 
                 End Try
 
